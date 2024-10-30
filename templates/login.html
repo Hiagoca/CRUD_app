@@ -3,9 +3,21 @@
 {% block content %}
 
 <h2>Logue-se</h2>
-<p>você precisa se logar para operar sua coleção.</p>
+<p>Você precisa se logar para operar sua coleção.</p>
 
-<form action="/login" method="post">
+{% if error %}
+
+<dialog open id="myDialog">
+    <h4>Oooops!</h4>
+    <p>Usuário e/ou senha inválido.</p>
+    <form method="dialog">
+        <button>OK</button>
+    </form>
+</dialog>
+
+{% endif %}
+
+<form action="/login" method="post" id="login">
 
     <p>
         <label for="email">E-mail:</label>
@@ -13,7 +25,7 @@
     </p>
     <p>
         <label for="password">Senha:</label>
-        <input type="text" name="password" id="password" required minlength="5" maxlength="25">
+        <input type="password" name="password" id="password" required minlength="5" maxlength="25">
     </p>
     <p>
         <button type="submit">Entrar</button>
