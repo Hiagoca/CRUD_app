@@ -192,18 +192,20 @@ div.item button {
     margin: auto;
 }
 
-#newThing label{
+#newThing label {
     display: block;
     padding: 0 0 .25rem .5rem;
 }
 
-#newThing input, #newThing textarea {
+#newThing input,
+#newThing textarea {
     width: 100%;
     border: 1px solid red;
     padding: .25rem .5rem;
 }
 
-#newThing input:valid, #newThing textarea:valid {
+#newThing input:valid,
+#newThing textarea:valid {
     border: 1px solid green;
 }
 
@@ -223,4 +225,8 @@ div.item button {
 #newThing:valid button {
     background-color: steelblue;
     pointer-events: all;
+}
+
+.center {
+    text-align: center;
 }

@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 import json
-from flask import Flask, make_response, redirect, render_template, request, url_for, g
+from flask import Flask, make_response, redirect, render_template, request, url_for
 from flask_mysqldb import MySQL
+import subprocess
+import random
+import string
 
 app = Flask(__name__)
 
@@ -15,6 +18,12 @@ app.config['MYSQL_USE_UNICODE'] = True
 app.config['MYSQL_CHARSET'] = 'utf8mb4'
 
 mysql = MySQL(app)
+
+
+def get_new_password(tamanho=8):
+    caracteres = string.ascii_letters + string.digits + "_-$&"
+    return ''.join(random.choice(caracteres) for _ in range(tamanho))
+    
 
 
 @app.before_request
@@ -243,6 +252,132 @@ def logout():
     resp.set_cookie('user_data', '', expires=0)
 
     return resp
+
+
+@app.route('/newuser', methods=['GET', 'POST'])
+def newuser():
+
+    cookie = request.cookies.get('user_data')
+    if cookie != None:
+        return redirect(url_for('home'))
+
+    feedback = ''
+    form = {}
+
+    if request.method == 'POST':
+
+        form = dict(request.form)
+
+        sql = '''
+            SELECT count(o_id) AS total
+            FROM owner
+            WHERE o_email = %s
+                AND o_status != 'del'
+        '''
+        cur = mysql.connection.cursor()
+        cur.execute(sql, (form['email'], ))
+        total = int(cur.fetchone()['total'])
+        cur.close()
+
+        if total == 0:
+            sql = '''
+                INSERT INTO owner (o_birth, o_name, o_email, o_pass)
+                VALUES (%s, %s, %s, SHA1(%s))
+            '''
+            cur = mysql.connection.cursor()
+            cur.execute(sql, (form['birth'], form['name'],
+                        form['email'], form['password'],))
+            mysql.connection.commit()
+            cur.close()
+
+            feedback = 'success'
+
+        else:
+            form['email'] = ''
+            feedback = 'error'
+
+    return render_template('newuser.html', feedback=feedback, form=form)
+
+
+@app.route('/profile')
+def profile():
+
+    cookie = request.cookies.get('user_data')
+    if cookie == None:
+        return redirect(url_for('login'))
+    user = json.loads(cookie)
+    user['fname'] = user['name'].split()[0]
+
+    sql = '''
+        SELECT *
+        FROM owner
+        WHERE o_id = %s
+            AND o_status = 'on'
+    '''
+    cur = mysql.connection.cursor()
+    cur.execute(sql, (user['id'], ))
+    userdata = cur.fetchone()
+    cur.close()
+
+    del userdata['o_pass']
+
+    return render_template('/profile.html', user=user, userdata=userdata)
+
+
+@app.route('/sendpass', methods=['GET', 'POST'])
+def sendpass():
+
+    feedback = ''
+
+    if request.method == 'POST':
+        form = dict(request.form)
+        sql = '''
+            SELECT o_id, o_email, o_name
+            FROM owner
+            WHERE o_email = %s
+                AND o_status = 'on'
+        '''
+        cur = mysql.connection.cursor()
+        cur.execute(sql, (form['email'], ))
+        userdata = cur.fetchone()
+        cur.close()
+
+        print('\n\n\n', userdata, '\n\n\n')
+
+        if userdata != None:
+
+            new_password = get_new_password()
+
+            sql = '''
+                UPDATE owner
+                SET o_pass = SHA1(%s)
+                WHERE o_id = %s
+                    AND o_status = 'on'
+            '''
+            cur = mysql.connection.cursor()
+            cur.execute(sql, (new_password, userdata['o_id'],))
+            mysql.connection.commit()
+            cur.close()
+
+            mail_message = f'''
+Olá {userdata['o_name']}!
+
+Você pediu uma nova senha de acesso ao "Cadastro de Trecos".
+
+Use esta senha para fazer login: {new_password}
+
+Obrigado...
+            '''
+            send_email(
+                userdata['o_email'],
+                'Cadastro de Trecos - nova senha',
+                mail_message
+            )
+            feedback = 'success'
+        else:
+            feedback = 'error'
+
+    return render_template('sendpass.html', feedback=feedback)
 
 
 if __name__ == '__main__':

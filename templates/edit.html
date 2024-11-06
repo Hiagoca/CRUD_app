@@ -18,30 +18,31 @@
 
 {% endif %}
 
-<form action="/new" method="post" id="newThing">
+<form action="/edit/{{ thing.t_id }}" method="post" id="newThing">
 
     <p>
         <label for="name">Nome:</label>
-        <input type="text" name="name" id="name" required minlength="3" maxlength="127">
+        <input type="text" name="name" id="name" required minlength="3" maxlength="127" value="{{ thing.t_name }}">
     </p>
 
     <p>
         <label for="photo">URL da foto:</label>
-        <input type="url" name="photo" id="photo" required>
+        <img src="{{ thing.t_photo }}" alt="{{ thing.t_name }}">
+        <input type="url" name="photo" id="photo" required value="{{ thing.t_photo }}">
     </p>
 
     <p>
         <label for="description">Descrição:</label>
-        <textarea name="description" id="description" required minlength="3"></textarea>
+        <textarea name="description" id="description" required minlength="3">{{ thing.t_description }}</textarea>
     </p>
 
     <p>
         <label for="location">Localização:</label>
-        <input type="text" name="location" id="location" required minlength="2">
+        <input type="text" name="location" id="location" required minlength="2" value="{{ thing.t_location }}">
     </p>
 
     <p>
-        <button type="submit">Cadastrar</button>
+        <button type="submit">Atualizar</button>
     </p>
 
 </form>

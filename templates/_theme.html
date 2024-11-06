@@ -19,8 +19,7 @@
         <nav>
             <button onclick="location.href='/'">Listar</button>
             <button onclick="location.href='/new'">Novo</button>
-            <span>Olá {{ user.fname }}! <button
-                    onclick="if (confirm('Tem certeza que deseja sair?')) location.href='/logout' ; return false ">X</button></span>
+            <span><a href="/profile">Olá {{ user.fname }}!</a></span>
         </nav>
 
         {% endif %}

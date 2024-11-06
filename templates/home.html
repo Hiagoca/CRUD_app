@@ -4,27 +4,29 @@
 
 <h2>Sua Lista de Trecos</h2>
 
-{% if edit %}
-
-<dialog open id="myDialog">
-    <h4>Legal!</h4>
-    <p>Seu treco foi editado!</p>
-    <form method="dialog">
-        <button>OK</button>
-    </form>
-</dialog>
-
-{% endif %}
-
 {% if delete %}
 
-<dialog open id="myDialog">
+<dialog id="myDialog">
     <h4>Legal!</h4>
     <p>Seu treco foi apagado!</p>
     <form method="dialog">
         <button>OK</button>
     </form>
 </dialog>
+<script>myDialog.showModal()</script>
+
+{% endif %}
+
+{% if edit %}
+
+<dialog id="myDialog">
+    <h4>Legal!</h4>
+    <p>Seu treco foi editado!</p>
+    <form method="dialog">
+        <button>OK</button>
+    </form>
+</dialog>
+<script>myDialog.showModal()</script>
 
 {% endif %}
 
